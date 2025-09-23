@@ -8,10 +8,11 @@ import { Ownable } from "openzeppelin-contracts-next/contracts/access/Ownable.so
 
 import { GoodDollarExchangeProvider } from "contracts/goodDollar/GoodDollarExchangeProvider.sol";
 import { GoodDollarExpansionController } from "contracts/goodDollar/GoodDollarExpansionController.sol";
-import { IRegistry } from "mento-std/interfaces/IRegistry.sol";
+import { IRegistry } from "contracts/goodDollar/interfaces/IRegistry.sol";
 import { Broker } from "contracts/swap/Broker.sol";
 import { IReserve } from "contracts/interfaces/IReserve.sol";
 import { ITradingLimits } from "contracts/interfaces/ITradingLimits.sol";
+import { IBancorExchangeProvider } from "contracts/interfaces/IBancorExchangeProvider.sol";
 import { IERC20 } from "contracts/interfaces/IERC20.sol";
 
 contract DeployMento is Script {
@@ -23,6 +24,12 @@ contract DeployMento is Script {
   address public broker = vm.envAddress("BROKER_IMPL");
   address public registry = vm.envAddress("REGISTRY_IMPL");
   address distHelper = vm.envAddress("DISTRIBUTION_HELPER");
+  uint256 public gdSupply = vm.envUint("GOODDOLLAR_SUPPLY");
+  uint256 public reserveSupply = vm.envUint("RESERVE_SUPPLY");
+  uint32 public exitContribution = uint32(vm.envUint("EXIT_CONTRIBUTION"));
+  uint256 public gdTargetPrice = vm.envUint("GOODDOLLAR_TARGET_PRICE");
+  // given price calculate the reserve ratio
+  uint32 reserveRatio = uint32((reserveSupply * 1e18 * 1e8) / (gdTargetPrice * gdSupply));
 
   // Proxy addresses
   TransparentUpgradeableProxy public exchangeProviderProxy;
@@ -88,13 +95,15 @@ contract DeployMento is Script {
     );
     Broker brokerProxied = Broker(address(brokerProxy));
     IReserve reserveProxied = IReserve(address(reserveProxy));
-    Ownable registryProxied = Ownable(address(registryProxy));
-    
+    IRegistry registryProxied = IRegistry(address(registryProxy));
+
+    console.log("initializing registry...", address(registryProxy));
     // Initialize contracts
+    registryProxied.initialize();
     registryProxied.transferOwnership(avatar);
 
     bytes32[] memory assets = new bytes32[](2);
-    assets[0] = "cUSD";
+    assets[0] = bytes32(bytes(IERC20(cUSD).symbol()));
     assets[1] = "cGLD";
     address[] memory cAssets = new address[](1);
     cAssets[0] = cUSD;
@@ -124,14 +133,14 @@ contract DeployMento is Script {
       address(brokerProxy),
       address(reserveProxy),
       address(expansionControllerProxy),
-      avatar // avatar address
+      signer // temporary avatar address
     );
 
     expansionControllerProxied.initialize(
       address(exchangeProviderProxy),
       address(distHelper), // distributionHelper address
       address(reserveProxy),
-      avatar // avatar address
+      signer // temporary avatar address
     );
 
     // Initialize broker with exchange providers and reserves
@@ -176,6 +185,21 @@ contract DeployMento is Script {
     brokerProxied.configureTradingLimit(exchangeId, cUSD, cusdLimits);
     // brokerProxied.configureTradingLimit(exchangeId, goodDollar, gdLimits);
 
+    IBancorExchangeProvider.PoolExchange memory exchange = IBancorExchangeProvider.PoolExchange({
+      reserveAsset: cUSD,
+      tokenAddress: goodDollar,
+      tokenSupply: gdSupply,
+      reserveBalance: reserveSupply,
+      reserveRatio: reserveRatio,
+      exitContribution: exitContribution
+    });
+
+    exchangeProviderProxied.createExchange(exchange);
+    expansionControllerProxied.setExpansionConfig(exchangeId, 288617289021952, 1 days);
+
+    exchangeProviderProxied.setAvatar(avatar);
+    expansionControllerProxied.setAvatar(avatar);
+
     brokerProxied.transferOwnership(avatar);
     reserveProxied.transferOwnership(avatar);
     exchangeProviderProxied.transferOwnership(avatar);
@@ -192,5 +216,6 @@ contract DeployMento is Script {
     console.log("Reserve Proxy deployed to:", address(reserveProxy));
     console.log("Reserve impl deployed to:", address(reserve));
     console.log("Broker Proxy deployed to:", address(brokerProxy));
+    console.log("Reserve Ratio calculated:", reserveRatio);
   }
 }

@@ -10,14 +10,13 @@ import { TradingLimitHelpers } from "../helpers/TradingLimitHelpers.sol";
 // Interfaces
 import { ITradingLimits } from "contracts/interfaces/ITradingLimits.sol";
 
-// Contracts
-import { GoodDollarBaseForkTest } from "./GoodDollarBaseForkTest.sol";
+// Contracts } fro
+import { XDC_ID } from "../BaseForkTest.sol";
+import { XDC_GoodDollarBaseForkTest } from "../GoodDollar_XDC/XDC_GoodDollarBaseForkTest.sol";
 
-contract GoodDollarTradingLimitsForkTest is GoodDollarBaseForkTest {
+contract XDC_GoodDollarTradingLimitsForkTest is XDC_GoodDollarBaseForkTest(XDC_ID) {
   using TradingLimitHelpers for *;
   using TokenHelpers for *;
-
-  constructor(uint256 _chainId) GoodDollarBaseForkTest(_chainId) {}
 
   function setUp() public override {
     super.setUp();
@@ -68,7 +67,8 @@ contract GoodDollarTradingLimitsForkTest is GoodDollarBaseForkTest {
     ITradingLimits.Config memory config = getTradingLimitsConfig(address(reserveToken));
 
     // Get the max amount we can swap in a single transaction before we hit L0
-    uint256 maxPerSwapInWei = uint256(uint48(config.limit0Out)) * 1e18;
+
+    uint256 maxPerSwapInWei = uint256(uint48(config.limit0Out)) * 1e6;
     uint256 inflowRequiredForAmountOut = goodDollarExchangeProvider.getAmountIn({
       exchangeId: exchangeId,
       tokenIn: address(goodDollarToken),
@@ -164,7 +164,7 @@ contract GoodDollarTradingLimitsForkTest is GoodDollarBaseForkTest {
     ITradingLimits.Config memory config = getTradingLimitsConfig(address(reserveToken));
 
     // Get the max amount we can swap in a single transaction before we hit L0
-    uint256 maxPerSwapInWei = uint256(uint48(config.limit0In)) * 1e18;
+    uint256 maxPerSwapInWei = uint256(uint48(config.limit0In)) * 1e6;
     deal({ token: address(reserveToken), to: trader, give: maxPerSwapInWei });
 
     vm.startPrank(trader);
