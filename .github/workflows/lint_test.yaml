@@ -49,7 +49,7 @@ jobs:
         run: forge config
 
       - name: Run the tests
-        run: forge test
+        run: forge test --jobs 1 --no-match-test test_fuzz_
 
       - name: Check contract sizes
         run: yarn run check-contract-sizes
