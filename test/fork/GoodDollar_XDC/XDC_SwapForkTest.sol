@@ -159,7 +159,7 @@ contract XDC_GoodDollarSwapForkTest is XDC_GoodDollarBaseForkTest(XDC_ID) {
     assertEq(amountOut, reserveToken.balanceOf(trader));
     assertEq(reserveBalanceBefore - amountOut, reserveBalanceAfter);
     assertTrue(priceAfter < priceBefore);
-  }  
+  }
 
   function test_swapIn_large_goodDollarToReserveToken() public {
     uint256 amountIn = 30000000 * 1e18;
@@ -225,5 +225,5 @@ contract XDC_GoodDollarSwapForkTest is XDC_GoodDollarBaseForkTest(XDC_ID) {
     assertEq(amountOut, reserveToken.balanceOf(trader));
     assertEq(reserveBalanceBefore - amountOut, reserveBalanceAfter);
     assertTrue(priceAfter < priceBefore);
-  }  
+  }
 }
