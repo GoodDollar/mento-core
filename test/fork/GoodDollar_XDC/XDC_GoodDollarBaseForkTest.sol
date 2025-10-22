@@ -283,7 +283,7 @@ contract XDC_GoodDollarBaseForkTest is BaseForkTest {
     assertEq(_poolExchange.reserveRatio, _poolExchange.reserveRatio);
     assertEq(_poolExchange.exitContribution, _poolExchange.exitContribution);
   }
-  
+
   function getExchangeId(IBancorExchangeProvider.PoolExchange memory exchange) public view returns (bytes32) {
     return keccak256(abi.encodePacked(IERC20(exchange.reserveAsset).symbol(), IERC20(exchange.tokenAddress).symbol()));
   }

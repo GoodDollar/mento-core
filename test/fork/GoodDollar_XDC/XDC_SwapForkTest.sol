@@ -166,7 +166,7 @@ contract XDC_GoodDollarSwapForkTest is XDC_GoodDollarBaseForkTest(XDC_ID) {
   function test_swapIn_large_goodDollarToReserveToken() public {
     // uint256 amountIn = 30000000 * 1e18;
     _disableTradeLimits();
-    uint256 amountIn = IERC20(address(goodDollarToken)).totalSupply() * 9 / 10;
+    uint256 amountIn = (IERC20(address(goodDollarToken)).totalSupply() * 9) / 10;
 
     uint256 reserveBalanceBefore = reserveToken.balanceOf(address(goodDollarReserve));
     uint256 priceBefore = IBancorExchangeProvider(address(goodDollarExchangeProvider)).currentPrice(exchangeId);
@@ -202,7 +202,7 @@ contract XDC_GoodDollarSwapForkTest is XDC_GoodDollarBaseForkTest(XDC_ID) {
   function test_swapOut_large_goodDollarToReserveToken() public {
     // uint256 amountOut = 5000 * 1e6;
     _disableTradeLimits();
-    uint256 amountOut = reserveToken.balanceOf(address(goodDollarReserve)) * 9 / 10;
+    uint256 amountOut = (reserveToken.balanceOf(address(goodDollarReserve)) * 9) / 10;
 
     uint256 reserveBalanceBefore = reserveToken.balanceOf(address(goodDollarReserve));
     uint256 priceBefore = IBancorExchangeProvider(address(goodDollarExchangeProvider)).currentPrice(exchangeId);
@@ -244,9 +244,11 @@ contract XDC_GoodDollarSwapForkTest is XDC_GoodDollarBaseForkTest(XDC_ID) {
       limit1In: 0,
       limit1Out: 0,
       limitGlobal: 0,
-      flags: 0x00 
+      flags: 0x00
     });
-    bytes32 exchangeId = keccak256(abi.encodePacked(IERC20(address(reserveToken)).symbol(), IERC20(address(goodDollarToken)).symbol()));
+    bytes32 exchangeId = keccak256(
+      abi.encodePacked(IERC20(address(reserveToken)).symbol(), IERC20(address(goodDollarToken)).symbol())
+    );
     vm.prank(Broker(address(broker)).owner());
     broker.configureTradingLimit(exchangeId, address(reserveToken), cusdLimits1);
   }
