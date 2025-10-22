@@ -49,7 +49,7 @@ jobs:
         run: forge config
 
       - name: Build the contracts
-        run: forge build --force
+        run: forge build
 
       - name: Run the tests
         run: forge test
