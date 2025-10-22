@@ -50,9 +50,6 @@ jobs:
       - name: Show the Foundry config
         run: forge config
 
-      - name: Build the contracts
-        run: forge build --skip test
-
       - name: Run the tests
         run: forge test
 
