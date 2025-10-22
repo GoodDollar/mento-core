@@ -51,7 +51,7 @@ jobs:
         run: forge config
 
       - name: Build the contracts
-        run: forge build
+        run: forge build --skip test
 
       - name: Run the tests
         run: forge test
