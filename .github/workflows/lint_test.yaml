@@ -28,7 +28,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: "v1.3.1"
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -49,6 +49,9 @@ jobs:
 
       - name: Show the Foundry config
         run: forge config
+
+      - name: Build the contracts
+        run: forge build
 
       - name: Run the tests
         run: forge test
