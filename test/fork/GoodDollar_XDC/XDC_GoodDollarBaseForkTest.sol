@@ -147,7 +147,14 @@ contract XDC_GoodDollarBaseForkTest is BaseForkTest {
     });
 
     vm.prank(AVATAR_ADDRESS);
-    exchangeId = IBancorExchangeProvider(address(goodDollarExchangeProvider)).createExchange(poolExchange);
+    exchangeId = getExchangeId(poolExchange);
+    if (
+      IBancorExchangeProvider(address(goodDollarExchangeProvider)).getPoolExchange(exchangeId).reserveAsset ==
+      address(0)
+    ) {
+      vm.prank(AVATAR_ADDRESS);
+      IBancorExchangeProvider(address(goodDollarExchangeProvider)).createExchange(poolExchange);
+    }
   }
 
   function configureExpansionController() public {
@@ -275,5 +282,9 @@ contract XDC_GoodDollarBaseForkTest is BaseForkTest {
     assertEq(_poolExchange.reserveBalance, _poolExchange.reserveBalance);
     assertEq(_poolExchange.reserveRatio, _poolExchange.reserveRatio);
     assertEq(_poolExchange.exitContribution, _poolExchange.exitContribution);
+  }
+
+  function getExchangeId(IBancorExchangeProvider.PoolExchange memory exchange) public view returns (bytes32) {
+    return keccak256(abi.encodePacked(IERC20(exchange.reserveAsset).symbol(), IERC20(exchange.tokenAddress).symbol()));
   }
 }
