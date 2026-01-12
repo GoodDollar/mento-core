@@ -164,9 +164,9 @@ contract DeployMento is Script {
       timestep1: 30 days, // Monthly timeframe
       // limit0: 40000, // 40K weekly limit
       // limit1: 80000, // 80K monthly limit
-      limit0In: 40000, // 40K weekly limit
+      limit0In: 140737488355326, // no weekly limit on incoming stable
       limit0Out: 40000, // 40K weekly limit
-      limit1In: 80000, // 80K monthly limit
+      limit1In: 140737488355327, // no monthly limit on incoming stable
       limit1Out: 80000, // 80K monthly limit
       limitGlobal: 0, // No global limit
       flags: 0x03 // enable 1+2 binary 011

@@ -37,6 +37,14 @@ interface IBancorExchangeProvider {
   event ExchangeCreated(bytes32 indexed exchangeId, address indexed reserveAsset, address indexed tokenAddress);
 
   /**
+   * @notice Emitted when a pool has been updated.
+   * @param exchangeId The id of the pool
+   * @param reserveAsset The address of the reserve asset
+   * @param tokenAddress The address of the token
+   */
+  event ExchangeUpdated(bytes32 indexed exchangeId, address indexed reserveAsset, address indexed tokenAddress);
+
+  /**
    * @notice Emitted when a pool has been destroyed.
    * @param exchangeId The id of the pool to destroy
    * @param reserveAsset The address of the reserve asset
@@ -110,6 +118,16 @@ interface IBancorExchangeProvider {
    * @return exchangeId The ID of the new pool.
    */
   function createExchange(PoolExchange calldata exchange) external returns (bytes32 exchangeId);
+
+  /**
+   * @notice updates a pool with the given parameters. can't modify tokens.
+   * for token with less than 18 decimals, make sure supply/reserve are not taken form existing
+   * pool which might be normalized to 18 decimals.
+   * @param exchangeId The ID of the pool to update.
+   * @param exchange The pool to be created.
+   * @return updated A boolean indicating whether or not the exchange was successfully updated.
+   */
+  function updateExchange(bytes32 exchangeId, PoolExchange calldata exchange) external returns (bool updated);
 
   /**
    * @notice Destroys a pool with the given parameters if it exists.

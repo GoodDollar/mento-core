@@ -196,6 +196,14 @@ contract BancorExchangeProvider is IExchangeProvider, IBancorExchangeProvider, B
   }
 
   /// @inheritdoc IBancorExchangeProvider
+  function updateExchange(
+    bytes32 _exchangeId,
+    PoolExchange calldata _exchange
+  ) external virtual onlyOwner returns (bool updated) {
+    return _updateExchange(_exchangeId, _exchange);
+  }
+
+  /// @inheritdoc IBancorExchangeProvider
   function destroyExchange(
     bytes32 exchangeId,
     uint256 exchangeIdIndex
@@ -293,6 +301,29 @@ contract BancorExchangeProvider is IExchangeProvider, IBancorExchangeProvider, B
     exchanges[exchangeId] = exchange;
     exchangeIds.push(exchangeId);
     emit ExchangeCreated(exchangeId, exchange.reserveAsset, exchange.tokenAddress);
+  }
+
+  function _updateExchange(bytes32 _exchangeId, PoolExchange calldata _exchange) internal returns (bool updated) {
+    PoolExchange memory exchange = _exchange;
+    validateExchange(exchange);
+
+    // slither-disable-next-line encode-packed-collision
+    bytes32 exchangeId = _exchangeId;
+
+    uint256 reserveAssetDecimals = IERC20(exchange.reserveAsset).decimals();
+    uint256 tokenDecimals = IERC20(exchange.tokenAddress).decimals();
+    require(reserveAssetDecimals <= 18, "Reserve asset decimals must be <= 18");
+    require(tokenDecimals <= 18, "Token decimals must be <= 18");
+
+    tokenPrecisionMultipliers[exchange.reserveAsset] = 10 ** (18 - uint256(reserveAssetDecimals));
+    tokenPrecisionMultipliers[exchange.tokenAddress] = 10 ** (18 - uint256(tokenDecimals));
+
+    exchange.reserveBalance = exchange.reserveBalance * tokenPrecisionMultipliers[exchange.reserveAsset];
+    exchange.tokenSupply = exchange.tokenSupply * tokenPrecisionMultipliers[exchange.tokenAddress];
+
+    exchanges[exchangeId] = exchange;
+    emit ExchangeUpdated(exchangeId, exchange.reserveAsset, exchange.tokenAddress);
+    return true;
   }
 
   function _destroyExchange(bytes32 exchangeId, uint256 exchangeIdIndex) internal returns (bool destroyed) {
