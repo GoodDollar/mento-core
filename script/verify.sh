@@ -1,5 +1,4 @@
 # GoodDollarExchangeProvider impl
-source .env.dev
 forge verify-contract --verifier etherscan --verifier-url https://api.celoscan.io/api --etherscan-api-key $CELOSCAN_KEY  $EXCHANGEPROVIDER_IMPL GoodDollarExchangeProvider --chain 42220 --constructor-args 0000000000000000000000000000000000000000000000000000000000000000 --optimizer-runs 200 --retries 1
 forge verify-contract --verifier sourcify $EXCHANGEPROVIDER_IMPL GoodDollarExchangeProvider --chain 42220 --constructor-args 0000000000000000000000000000000000000000000000000000000000000000 --optimizer-runs 200 --retries 1
 

@@ -22,7 +22,6 @@ contract DeployGoodDollarImplementationsUpgrade is Script {
   Broker public broker;
 
   uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-  address avatar = vm.envAddress("AVATAR");
   string env = vm.envString("IMPL_ENV");
   address signer = vm.addr(deployerPrivateKey);
   address c2Deployer = 0x4e59b44847b379578588920cA78FbF26c0B4956C;

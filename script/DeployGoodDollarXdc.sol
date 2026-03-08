@@ -148,16 +148,12 @@ contract DeployGoodDollarXDC is Script {
     IRegistry registryProxied = IRegistry(address(registryProxy));
     console.log("upgrading proxies impls to latest....");
     exchangeProvider = vm.envAddress("EXCHANGEPROVIDER_IMPL_LATEST");
-    expansionController = vm.envAddress("EXPANSIONCONTROLLER_IMPL_LATEST");
-    reserve = vm.envAddress("RESERVE_IMPL_LATEST");
     broker = vm.envAddress("BROKER_IMPL_LATEST");
     proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(brokerProxy)), broker);
     console.log(
       "broker proxy impl after upgrade:",
       proxyAdmin.getProxyImplementation(ITransparentUpgradeableProxy(address(brokerProxy)))
     );
-    proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(reserveProxy)), reserve);
-    proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(expansionControllerProxy)), expansionController);
     proxyAdmin.upgrade(ITransparentUpgradeableProxy(address(exchangeProviderProxy)), exchangeProvider);
 
     // transfering proxy admin to avatar
