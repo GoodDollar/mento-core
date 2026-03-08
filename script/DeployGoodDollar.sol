@@ -15,6 +15,9 @@ import { ITradingLimits } from "contracts/interfaces/ITradingLimits.sol";
 import { IBancorExchangeProvider } from "contracts/interfaces/IBancorExchangeProvider.sol";
 import { IERC20 } from "contracts/interfaces/IERC20.sol";
 
+/** original script for deploying on celo
+ * use deploygooddollarxdc.sol to deploy on xdc or other chains
+ */
 contract DeployMento is Script {
   // Deployment addresses to be populated
   ProxyAdmin public proxyAdmin;

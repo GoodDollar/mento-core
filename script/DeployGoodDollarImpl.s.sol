@@ -16,12 +16,9 @@ import { IERC20 } from "contracts/interfaces/IERC20.sol";
 
 // import { BrokerProxy } from "contracts/swap/BrokerProxy.sol";
 
-contract DeployGoodDollarImplementations is Script {
+contract DeployGoodDollarImplementationsUpgrade is Script {
   // Deployment addresses to be populated
   GoodDollarExchangeProvider public exchangeProvider;
-  GoodDollarExpansionController public expansionController;
-  address public registry;
-  address public reserve;
   Broker public broker;
 
   uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -35,36 +32,16 @@ contract DeployGoodDollarImplementations is Script {
     console.log("Deployer:", signer);
 
     // Deploy implementation contracts
-    exchangeProvider = new GoodDollarExchangeProvider{ salt: keccak256(abi.encodePacked("ExchangeProviderImpl", env)) }(
-      true
-    );
-
-    expansionController = new GoodDollarExpansionController{
-      salt: keccak256(abi.encodePacked("ExpansionControllerImpl", env))
+    exchangeProvider = new GoodDollarExchangeProvider{
+      salt: keccak256(abi.encodePacked("ExchangeProviderImplV2", env))
     }(true);
 
-    console.log("deployed expansion");
-    // registry = new Registry{ salt: keccak256(abi.encodePacked("RegistryImpl", "")) }(false);
-
-    bytes memory reserveCode = vm.getCode("Reserve.sol");
-    bytes memory c2Code = abi.encodePacked(
-      keccak256(abi.encodePacked("MentoReserveImpl", env)),
-      abi.encodePacked(reserveCode, abi.encode(false))
-    );
-
-    (, bytes memory result) = c2Deployer.call{ value: 0 }(c2Code);
-    reserve = address(bytes20(result));
-    console.log("deployed reserve");
-    // reserve = 0xf78C12e6d3971cfC325A3B150fA4BB5AB8660c3F; //deployCode("Reserve.sol", abi.encode(true)); //because of solidity version conflict
     broker = new Broker{ salt: keccak256(abi.encodePacked("MentoBrokerImplV2", env)) }(false);
     console.log("deployed broker");
     vm.stopBroadcast();
 
     // Log deployed addresses
     console.log("GoodDollarExchangeProvider deployed to:", address(exchangeProvider));
-    console.log("GoodDollarExpansionController  deployed to:", address(expansionController));
-    console.log("Registry impl deployed to:", address(registry));
-    console.log("Reserve impl deployed to:", address(reserve));
     console.log("Broker deployed to:", address(broker));
   }
 }
