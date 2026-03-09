@@ -16,58 +16,31 @@ import { IERC20 } from "contracts/interfaces/IERC20.sol";
 
 // import { BrokerProxy } from "contracts/swap/BrokerProxy.sol";
 
-contract DeployGoodDollarImplementations is Script {
+contract DeployGoodDollarImplementationsUpgrade is Script {
   // Deployment addresses to be populated
   GoodDollarExchangeProvider public exchangeProvider;
-  GoodDollarExpansionController public expansionController;
-  address public registry;
-  address public reserve;
   Broker public broker;
 
   uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-  address avatar = vm.envAddress("AVATAR");
+  string env = vm.envString("IMPL_ENV");
   address signer = vm.addr(deployerPrivateKey);
   address c2Deployer = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
 
   function run() public {
     vm.startBroadcast(deployerPrivateKey);
+    console.log("Deployer:", signer);
 
     // Deploy implementation contracts
-    exchangeProvider = new GoodDollarExchangeProvider{ salt: keccak256(abi.encodePacked("ExchangeProviderImpl", "")) }(
-      true
-    );
-    expansionController = new GoodDollarExpansionController{
-      salt: keccak256(abi.encodePacked("ExpansionControllerImpl", ""))
+    exchangeProvider = new GoodDollarExchangeProvider{
+      salt: keccak256(abi.encodePacked("ExchangeProviderImplV2", env))
     }(true);
 
-    // registry = new Registry{ salt: keccak256(abi.encodePacked("RegistryImpl", "")) }(false);
-    bytes memory registryCode = vm.getCode("Registry.sol");
-    bytes memory c2RegistryCode = abi.encodePacked(
-      keccak256(abi.encodePacked("RegistryImpl", "")),
-      abi.encodePacked(registryCode, abi.encode(false))
-    );
-    (, bytes memory resultRegistry) = c2Deployer.call{ value: 0 }(c2RegistryCode);
-    registry = address(bytes20(resultRegistry));
-
-    bytes memory reserveCode = vm.getCode("Reserve.sol");
-    bytes memory c2Code = abi.encodePacked(
-      keccak256(abi.encodePacked("MentoReserveImpl", "")),
-      abi.encodePacked(reserveCode, abi.encode(false))
-    );
-
-    (, bytes memory result) = c2Deployer.call{ value: 0 }(c2Code);
-    reserve = address(bytes20(result));
-    // reserve = 0xf78C12e6d3971cfC325A3B150fA4BB5AB8660c3F; //deployCode("Reserve.sol", abi.encode(true)); //because of solidity version conflict
-    broker = new Broker{ salt: keccak256(abi.encodePacked("MentoBrokerImpl", "")) }(false);
-
+    broker = new Broker{ salt: keccak256(abi.encodePacked("MentoBrokerImplV2", env)) }(false);
+    console.log("deployed broker");
     vm.stopBroadcast();
 
     // Log deployed addresses
-    console.log("Deployer:", signer);
     console.log("GoodDollarExchangeProvider deployed to:", address(exchangeProvider));
-    console.log("GoodDollarExpansionController  deployed to:", address(expansionController));
-    console.log("Registry impl deployed to:", address(registry));
-    console.log("Reserve impl deployed to:", address(reserve));
     console.log("Broker deployed to:", address(broker));
   }
 }
